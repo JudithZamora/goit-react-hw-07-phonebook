@@ -1,22 +1,24 @@
+// app.js
+
 import React, { useEffect } from 'react';
+import { nanoid } from 'nanoid';
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
-import { useSelector, useDispatch } from 'react-redux';
-import { addContactAsync, deleteContactAsync, fetchContactsAsync, setFilter } from './slices/contactsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchContactsAsync, addContactAsync, deleteContactAsync, setFilter } from './slices/contactsSlice';
 
 const App = () => {
   const contacts = useSelector((state) => state.contacts.contacts);
   const filter = useSelector((state) => state.contacts.filter);
-  const isLoading = useSelector((state) => state.contacts.isLoading);
-  const error = useSelector((state) => state.contacts.error);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // Cargar contactos al montar el componente
     dispatch(fetchContactsAsync());
   }, [dispatch]);
 
-  const handleAddContact = async ({ name, number }) => {
+  const handleAddContact = ({ name, number }) => {
     const existingContact = contacts.find(
       (contact) => contact.name.toLowerCase() === name.toLowerCase()
     );
@@ -26,24 +28,17 @@ const App = () => {
       return;
     }
 
-    await dispatch(addContactAsync({ name, number }));
-  };
-
-  const handleDeleteContact = async (id) => {
-    await dispatch(deleteContactAsync(id));
+    const newContact = {
+      id: nanoid(),
+      name: name,
+      number: number,
+    };
+    dispatch(addContactAsync(newContact));
   };
 
   const filteredContacts = contacts.filter((contact) =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
   return (
     <div>
@@ -51,7 +46,7 @@ const App = () => {
       <ContactForm addContact={handleAddContact} />
       <h2>Contacts</h2>
       <Filter filter={filter} setFilter={(value) => dispatch(setFilter(value))} />
-      <ContactList contacts={filteredContacts} deleteContact={handleDeleteContact} />
+      <ContactList contacts={filteredContacts} deleteContact={deleteContactAsync} />
     </div>
   );
 };

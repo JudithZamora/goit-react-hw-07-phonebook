@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_URL = 'https://6549a5dee182221f8d51bdc6.mockapi.io';
@@ -21,7 +21,6 @@ export const addContactAsync = createAsyncThunk('contacts/addContact', async (ne
   }
 });
 
-
 export const deleteContactAsync = createAsyncThunk('contacts/deleteContact', async (contactId) => {
   try {
     await axios.delete(`${API_URL}/contacts/${contactId}`);
@@ -30,7 +29,9 @@ export const deleteContactAsync = createAsyncThunk('contacts/deleteContact', asy
     throw new Error('Error deleting contact');
   }
 });
-
+export const setFilter = (filter) => {
+  return { type: 'contacts/setFilter', payload: filter };
+};
 
 const contactsSlice = createSlice({
   name: 'contacts',
@@ -59,6 +60,4 @@ const contactsSlice = createSlice({
   },
 });
 
-
 export const { reducer: contactsReducer } = contactsSlice;
-export { fetchContactsAsync, addContactAsync, deleteContactAsync };
